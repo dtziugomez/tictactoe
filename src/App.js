@@ -1,35 +1,31 @@
-import React from 'react';
-import './App.css';
+import React from "react";
+import "./App.css";
 
-
-function Square(props){
-  return(
+function Square(props) {
+  return (
     <button className="square bg-success" onClick={props.onClick}>
       {props.value}
     </button>
-  )
+  );
 }
 
-class Board extends React.Component{
-  
-  renderSquare(i){
-    return(
-      <Square 
-      value={this.props.squares[i]}
-      onClick = {()=>this.props.onClick(i)}/>
-    ); 
+class Board extends React.Component {
+  renderSquare(i) {
+    return (
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
   }
 
-  render(){
-      
-      return (
-        
-        <div className="m-5 justify-content-center">
-        
+  render() {
+    return (
+      <div className="m-5 justify-content-center">
         <div className="board-row">
-         {this.renderSquare(0)}
-         {this.renderSquare(1)}
-         {this.renderSquare(2)}
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
         </div>
         <div className="board-row">
           {this.renderSquare(3)}
@@ -42,145 +38,139 @@ class Board extends React.Component{
           {this.renderSquare(8)}
         </div>
       </div>
-      
-      
-    );  
-    
-
-    
+    );
   }
 }
 
-class Game extends React.Component{
-
-  constructor(props){
+class Game extends React.Component {
+  constructor(props) {
     super(props);
     this.state = {
-      history : [{
-        squares: Array(9).fill(null)
-      }],
+      history: [
+        {
+          squares: Array(9).fill(null)
+        }
+      ],
       stepNumber: 0,
-      xIsNext : true
+      xIsNext: true
     };
   }
 
-  handleClick(i){
-    
-      const history = this.state.history.slice(0,this.state.stepNumber + 1);
-      const current = history[history.length-1];
-      const squares = current.squares.slice();
-      if (calculateWinner(squares) || squares[i]) {
-        return
-      }
-      squares[i] = this.state.xIsNext?'X':'O';
-      this.setState({
-        history : history.concat([{
+  handleClick(i) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    this.setState({
+      history: history.concat([
+        {
           squares: squares
-        }]),
-        stepNumber : history.length,
-        xIsNext : !this.state.xIsNext
-      });
-    
-    
+        }
+      ]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext
+    });
   }
 
-  jumpTo(step){
-    
-    if (step===0) {
+  jumpTo(step) {
+    if (step === 0) {
       this.setState({
-        history : [{
-          squares : Array(9).fill(null)
-        }],
-        stepNumber : 0,
-        xIsNext : true
-      }
-        
-      );
-    }else{
+        history: [
+          {
+            squares: Array(9).fill(null)
+          }
+        ],
+        stepNumber: 0,
+        xIsNext: true
+      });
+    } else {
       this.setState({
-        stepNumber : step,
-        xIsNext : (step%2)===0
+        stepNumber: step,
+        xIsNext: step % 2 === 0
       });
     }
-    
   }
-  render(){
+  render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
-    const moves = history.map((step,move)=>{
-      const desc = move ? 
-      'Go to move #' + move :
-      'Start';
-      if (desc=='Start') {
+    const moves = history.map((step, move) => {
+      const desc = move ? "Go to move #" + move : "Start";
+      if (desc === "Start") {
         return (
-        
           <li key={move}>
-            <button onClick={()=>this.jumpTo(move)} className="btn btn-primary">{desc}</button><br/><br/>
+            <button
+              onClick={() => this.jumpTo(move)}
+              className="btn btn-primary"
+            >
+              {desc}
+            </button>
+            <br />
+            <br />
           </li>
-        )
-      }else{
+        );
+      } else {
         return (
-        
           <li key={move}>
-            <button onClick={()=>this.jumpTo(move)} className="btn btn-secondary">{desc}</button>
+            <button
+              onClick={() => this.jumpTo(move)}
+              className="btn btn-secondary"
+            >
+              {desc}
+            </button>
           </li>
-        )  
+        );
       }
-      
-    })
-    let status ;
+    });
+    let status;
     if (winner) {
-      status = 'Winner: ' + winner;
-    } else{
-      status = 'Next player: ' +  (this.state.xIsNext?'X':'O');
+      status = "Winner: " + winner;
+    } else {
+      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
     }
-       return(
-        
-        <div className="game">
-        
+    return (
+      <div className="game">
         <div className="row justify-content-center">
           <div className="">
             <h3>{status}</h3>
             <div className="game-info">
               <ol>{moves}</ol>
             </div>
-            </div>
-            <div className="game-board">{/*  */}
-              <Board 
+          </div>
+          <div className="game-board">
+            {/*  */}
+            <Board
               squares={current.squares}
-              onClick={(i) => this.handleClick(i)}
-              /> 
-            </div>
+              onClick={i => this.handleClick(i)}
+            />
+          </div>
         </div>
-          
-          
-        </div>
-      
+      </div>
     );
   }
 }
 
-
-function calculateWinner(squares){
+function calculateWinner(squares) {
   const lines = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0.4,8],
-    [2,4,6]
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0.4, 8],
+    [2, 4, 6]
   ];
-  for (let i = 0;i< lines.length; i++){
-    const [a,b,c] = lines[i];
-    if (squares[a] && squares[a]===squares[b] && squares[b]===squares[c]) {
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {
       return squares[a];
     }
   }
   return null;
-
 }
 export default Game;
